@@ -151,15 +151,16 @@ h2 {
     border: 1px solid #fecaca;
 }
 
-.input-with-icon {
-  position: relative;
+.input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
 }
 
-.input-with-icon .input-icon {
+.input-icon {
     position: absolute;
     left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
+    z-index: 10;
     color: var(--dark-gray-color);
     width: 20px;
     height: 20px;
@@ -168,19 +169,21 @@ h2 {
 .login-form input {
     padding-left: 40px;
     width: 100%;
+    flex: 1;
 }
 
 .password-toggle-btn {
     position: absolute;
     right: 1px;
-    top: 1px;
-    bottom: 1px;
+    top: 50%;
+    transform: translateY(-50%);
     background: transparent;
     border: none;
     padding: 0 12px;
     cursor: pointer;
     display: flex;
     align-items: center;
+    color: var(--dark-gray-color);
 }
 
 .login-options {
