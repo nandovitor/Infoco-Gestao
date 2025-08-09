@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "dev": "vite",
+    "build": "vite build",
     "db:push": "ts-node --require dotenv/config scripts/seed.ts"
   },
   "dependencies": {
@@ -17,9 +19,11 @@
     "@types/pg": "^8.11.5",
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
+    "@vitejs/plugin-react": "^4.3.1",
     "@vercel/node": "^3.0.25",
     "dotenv": "^16.4.5",
     "ts-node": "^10.9.2",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "vite": "^5.2.11"
   }
 }
