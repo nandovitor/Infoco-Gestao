@@ -6,7 +6,6 @@ import { Icons } from '../lib/icons';
 const useOnClickOutside = (ref: React.RefObject<HTMLElement>, handler: (event: MouseEvent | TouchEvent) => void) => {
   useEffect(() => {
     const listener = (event: MouseEvent | TouchEvent) => {
-      // Do nothing if clicking ref's element or descendent elements
       if (!ref.current || ref.current.contains(event.target as Node)) {
         return;
       }
@@ -22,7 +21,7 @@ const useOnClickOutside = (ref: React.RefObject<HTMLElement>, handler: (event: M
 };
 
 
-const NavLink: React.FC<{ page: any; currentPage: Page; openMenu: string | null; setOpenMenu: (id: string | null) => void; }> = ({ page, currentPage, openMenu, setOpenMenu }) => {
+const NavLink: React.FC<{ page: any; currentPage: Page; onSetPage: (page: Page) => void; openMenu: string | null; setOpenMenu: (id: string | null) => void; }> = ({ page, currentPage, onSetPage, openMenu, setOpenMenu }) => {
   const Icon = Icons[page.icon as keyof typeof Icons] || Icons.dashboard;
   const hasSubItems = page.subItems && page.subItems.length > 0;
   const isActive = currentPage === page.id || (hasSubItems && page.subItems.some((sub: any) => sub.id === currentPage));
@@ -30,6 +29,12 @@ const NavLink: React.FC<{ page: any; currentPage: Page; openMenu: string | null;
   
   const navItemRef = useRef<HTMLLIElement>(null);
   useOnClickOutside(navItemRef, () => setOpenMenu(null));
+
+  const handleClick = (e: React.MouseEvent, targetPage: Page) => {
+    e.preventDefault();
+    onSetPage(targetPage);
+    setOpenMenu(null);
+  }
 
   const handleToggleMenu = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -48,7 +53,7 @@ const NavLink: React.FC<{ page: any; currentPage: Page; openMenu: string | null;
           <ul className="dropdown-menu">
             {page.subItems.map((subItem: any) => (
               <li key={subItem.id}>
-                <a href={`#${subItem.id}`} className="dropdown-item" onClick={() => setOpenMenu(null)}>{subItem.label}</a>
+                <a href={`#${subItem.id}`} onClick={(e) => handleClick(e, subItem.id)} className="dropdown-item">{subItem.label}</a>
               </li>
             ))}
           </ul>
@@ -59,7 +64,7 @@ const NavLink: React.FC<{ page: any; currentPage: Page; openMenu: string | null;
 
   return (
     <li className="nav-item">
-      <a href={`#${page.id}`} className={`nav-link ${isActive ? 'active' : ''}`}>
+      <a href={`#${page.id}`} onClick={(e) => handleClick(e, page.id)} className={`nav-link ${isActive ? 'active' : ''}`}>
         <Icon className="w-5 h-5" />
         <span>{page.label}</span>
       </a>
@@ -67,21 +72,27 @@ const NavLink: React.FC<{ page: any; currentPage: Page; openMenu: string | null;
   );
 };
 
-const TopNav = ({ currentPage, onLogout }: { currentPage: Page; onLogout: () => void; }) => {
+const TopNav = ({ currentPage, onSetPage, onLogout }: { currentPage: Page; onSetPage: (page: Page) => void; onLogout: () => void; }) => {
     const [openMenu, setOpenMenu] = useState<string | null>(null);
     const profileRef = useRef<HTMLDivElement>(null);
     useOnClickOutside(profileRef, () => {
         if (openMenu === 'user-profile') setOpenMenu(null);
     });
+    
+    const handleProfileItemClick = (e: React.MouseEvent, page: Page) => {
+        e.preventDefault();
+        onSetPage(page);
+        setOpenMenu(null);
+    }
 
     return (
         <header className="top-nav">
             <div className="nav-left">
-                <a href="#Dashboard" className="nav-logo">INFOCO</a>
+                <a href="#Dashboard" onClick={(e) => {e.preventDefault(); onSetPage('Dashboard')}} className="nav-logo">INFOCO</a>
             </div>
             <div className="nav-center">
                  <ul className="nav-menu">
-                    {pages.map(page => <NavLink key={page.id} page={page} currentPage={currentPage} openMenu={openMenu} setOpenMenu={setOpenMenu} />)}
+                    {pages.map(page => <NavLink key={page.id} page={page} currentPage={currentPage} onSetPage={onSetPage} openMenu={openMenu} setOpenMenu={setOpenMenu} />)}
                 </ul>
             </div>
             <div className="nav-right">
@@ -99,7 +110,7 @@ const TopNav = ({ currentPage, onLogout }: { currentPage: Page; onLogout: () => 
                     </div>
                     {openMenu === 'user-profile' && (
                         <div className="dropdown-menu" style={{right: 0, left: 'auto'}}>
-                             <a href="#Configurações" className="dropdown-item" onClick={() => setOpenMenu(null)}>Configurações Gerais</a>
+                             <a href="#Configurações" className="dropdown-item" onClick={(e) => handleProfileItemClick(e, 'Configurações')}>Configurações Gerais</a>
                              <a href="#" className="dropdown-item" onClick={() => { onLogout(); setOpenMenu(null); }}>Sair</a>
                         </div>
                     )}
