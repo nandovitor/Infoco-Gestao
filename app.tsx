@@ -8,9 +8,10 @@ import RecursosHumanos from './components/RecursosHumanos';
 import ZohoMail from './components/ZohoMail';
 import Settings from './components/Settings';
 import InfoCoIA from './components/InfoCoIA';
-import { Page, pages } from './lib/data';
+import Login from './components/Login';
+import { Page } from './lib/data';
 
-const pageComponents: { [key in Page]: React.ComponentType } = {
+const pageComponents: { [key in Page]: React.ComponentType<any> } = {
   Dashboard,
   'Notas de Atualização': () => <div className="card"><h1>Notas de Atualização</h1><p>Página em construção.</p></div>,
   'Base de Dados': () => <div className="card"><h1>Base de Dados por Município</h1><p>Página em construção.</p></div>,
@@ -28,26 +29,52 @@ const pageComponents: { [key in Page]: React.ComponentType } = {
 };
 
 export const App = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(sessionStorage.getItem('isAuthenticated') === 'true');
   const [currentPage, setCurrentPage] = useState<Page>('Dashboard');
 
   useEffect(() => {
+    if (!isAuthenticated) return;
+
     const handleHashChange = () => {
-      const hash = window.location.hash.replace('#', '');
-      const validPage = pages.find(p => p.id === hash);
-      setCurrentPage(validPage ? (validPage.id as Page) : 'Dashboard');
+      const hash = window.location.hash.replace('#', '') || 'Dashboard';
+      // Validate that the hash corresponds to a renderable page component
+      if (Object.keys(pageComponents).includes(hash)) {
+        setCurrentPage(hash as Page);
+      } else {
+        setCurrentPage('Dashboard');
+      }
     };
     
     window.addEventListener('hashchange', handleHashChange);
-    handleHashChange(); // Initial load
+    handleHashChange(); // Initial load for the authenticated user
 
     return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
+  }, [isAuthenticated]);
+
+  const handleLogin = (email: string, pass: string): boolean => {
+      if (email === 'infoco@gmail.com' && pass === 'Infoco@2025') {
+          sessionStorage.setItem('isAuthenticated', 'true');
+          setIsAuthenticated(true);
+          window.location.hash = '#Dashboard'; // Redirect to dashboard on successful login
+          return true;
+      }
+      return false;
+  };
+
+  const handleLogout = () => {
+      sessionStorage.removeItem('isAuthenticated');
+      setIsAuthenticated(false);
+  };
+
+  if (!isAuthenticated) {
+    return <Login onLogin={handleLogin} />;
+  }
 
   const CurrentPageComponent = pageComponents[currentPage] || Dashboard;
 
   return (
     <>
-      <TopNav currentPage={currentPage} />
+      <TopNav currentPage={currentPage} onLogout={handleLogout} />
       <main>
         <CurrentPageComponent />
       </main>
