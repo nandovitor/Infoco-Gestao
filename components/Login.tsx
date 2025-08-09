@@ -33,7 +33,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           {error && <p className="login-error">{error}</p>}
           <div className="form-group">
             <label htmlFor="email">Email</label>
-            <div className="input-with-icon">
+            <div className="input-group">
               <Icons.email className="input-icon" />
               <input 
                 type="email" 
@@ -47,7 +47,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           </div>
           <div className="form-group">
             <label htmlFor="password">Senha</label>
-            <div className="input-with-icon">
+            <div className="input-group">
               <Icons.lock className="input-icon" />
               <input 
                 type={showPassword ? 'text' : 'password'}
@@ -55,9 +55,10 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 placeholder="Sua senha" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)} 
+                required
               />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="password-toggle-btn">
-                {showPassword ? <Icons.eyeOff className="input-icon" /> : <Icons.eye className="input-icon" />}
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="password-toggle-btn" aria-label="Toggle password visibility">
+                {showPassword ? <Icons.eyeOff className="w-5 h-5" /> : <Icons.eye className="w-5 h-5" />}
               </button>
             </div>
           </div>
