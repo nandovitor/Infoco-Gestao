@@ -28,26 +28,30 @@ const pageComponents: { [key in Page]: React.ComponentType<any> } = {
   Configurações: Settings,
 };
 
+// Function to get page from hash, defaulting to Dashboard
+const getPageFromHash = (): Page => {
+    const hash = window.location.hash.replace('#', '');
+    if (Object.keys(pageComponents).includes(hash)) {
+        return hash as Page;
+    }
+    return 'Dashboard';
+};
+
 export const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(sessionStorage.getItem('isAuthenticated') === 'true');
-  const [currentPage, setCurrentPage] = useState<Page>('Dashboard');
+  const [currentPage, setCurrentPage] = useState<Page>(getPageFromHash());
 
   useEffect(() => {
-    if (!isAuthenticated) return;
-
+    // This effect ensures that if the user manually changes the hash or uses back/forward buttons, the UI updates.
     const handleHashChange = () => {
-      const hash = window.location.hash.replace('#', '') || 'Dashboard';
-      // Validate that the hash corresponds to a renderable page component
-      if (Object.keys(pageComponents).includes(hash)) {
-        setCurrentPage(hash as Page);
-      } else {
-        setCurrentPage('Dashboard');
-      }
+        setCurrentPage(getPageFromHash());
     };
     
     window.addEventListener('hashchange', handleHashChange);
-    handleHashChange(); // Initial load for the authenticated user
-
+    // Set initial page on load for authenticated users
+    if (isAuthenticated) {
+        handleHashChange();
+    }
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, [isAuthenticated]);
 
@@ -55,7 +59,9 @@ export const App = () => {
       if (email === 'infoco@gmail.com' && pass === 'Infoco@2025') {
           sessionStorage.setItem('isAuthenticated', 'true');
           setIsAuthenticated(true);
-          window.location.hash = '#Dashboard'; // Redirect to dashboard on successful login
+          const initialPage = 'Dashboard';
+          setCurrentPage(initialPage);
+          window.location.hash = `#${initialPage}`;
           return true;
       }
       return false;
@@ -64,7 +70,13 @@ export const App = () => {
   const handleLogout = () => {
       sessionStorage.removeItem('isAuthenticated');
       setIsAuthenticated(false);
+      window.location.hash = ''; // Clear hash on logout
   };
+  
+  const handleSetPage = (page: Page) => {
+    setCurrentPage(page);
+    window.location.hash = `#${page}`;
+  }
 
   if (!isAuthenticated) {
     return <Login onLogin={handleLogin} />;
@@ -74,7 +86,7 @@ export const App = () => {
 
   return (
     <>
-      <TopNav currentPage={currentPage} onLogout={handleLogout} />
+      <TopNav currentPage={currentPage} onSetPage={handleSetPage} onLogout={handleLogout} />
       <main>
         <CurrentPageComponent />
       </main>
