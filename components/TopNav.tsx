@@ -35,7 +35,7 @@ const NavLink: React.FC<{ page: any; currentPage: Page }> = ({ page, currentPage
   );
 };
 
-const TopNav = ({ currentPage }: { currentPage: Page }) => {
+const TopNav = ({ currentPage, onLogout }: { currentPage: Page; onLogout: () => void; }) => {
     const [isProfileOpen, setProfileOpen] = useState(false);
 
     return (
@@ -62,7 +62,7 @@ const TopNav = ({ currentPage }: { currentPage: Page }) => {
                     {isProfileOpen && (
                         <div className="dropdown-menu" style={{display: 'block', right: 0, left: 'auto'}}>
                              <a href="#Configurações" className="dropdown-item" onClick={() => setProfileOpen(false)}>Configurações Gerais</a>
-                             <a href="#" className="dropdown-item">Sair</a>
+                             <a href="#" className="dropdown-item" onClick={onLogout}>Sair</a>
                         </div>
                     )}
                 </div>
