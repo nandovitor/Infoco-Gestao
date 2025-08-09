@@ -2,6 +2,7 @@
 
 import { db } from '../api/db';
 import { employees, tasks, financialDetails, expenses } from '../lib/data';
+import process from 'process';
 
 function parseDate(dateStr: string): string {
     const [day, month, year] = dateStr.split('/');
@@ -75,6 +76,16 @@ async function seedExpenses() {
 
 
 async function main() {
+  // Check for the environment variable before doing anything else.
+  if (!process.env.POSTGRES_URL) {
+    console.error('----------------------------------------------------');
+    console.error('❌ ERRO: Variável de ambiente POSTGRES_URL não definida.');
+    console.error('Por favor, crie um arquivo .env na raiz do projeto e adicione a URL de conexão do seu banco de dados Neon.');
+    console.error('Exemplo: POSTGRES_URL="postgresql://user:password@host:port/dbname"');
+    console.error('----------------------------------------------------');
+    process.exit(1);
+  }
+
   const client = await db.connect();
 
   try {
@@ -94,7 +105,7 @@ async function main() {
   } catch (error) {
     await client.query('ROLLBACK');
     console.error('❌ Error seeding database:', error);
-    (process as any).exit(1);
+    process.exit(1);
   } finally {
     client.release();
     await db.end(); // Fecha a pool
